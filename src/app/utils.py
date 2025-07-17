@@ -19,6 +19,8 @@ from langchain_community.document_loaders import (
     UnstructuredExcelLoader,
     UnstructuredPowerPointLoader
 )
+from pptx import Presentation
+from docx import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
@@ -65,9 +67,31 @@ def load_document(file_path: str) -> List[Document]:
         if file_ext == '.pdf':
             loader = PyPDFLoader(file_path)
         elif file_ext in ['.docx', '.doc']:
-            loader = UnstructuredWordDocumentLoader(file_path)
+            # Use python-docx for better DOCX handling
+            try:
+                doc = Document(file_path)
+                text = [paragraph.text for paragraph in doc.paragraphs if paragraph.text]
+                if not text:
+                    # Fallback to UnstructuredWordDocumentLoader if no text found
+                    loader = UnstructuredWordDocumentLoader(file_path)
+                    return loader.load()
+                return [Document(page_content="\n".join(text), metadata={"source": file_path})]
+            except Exception as e:
+                logger.warning(f"Error using python-docx: {str(e)}. Falling back to UnstructuredWordDocumentLoader.")
+                loader = UnstructuredWordDocumentLoader(file_path)
         elif file_ext in ['.pptx', '.ppt']:
-            loader = UnstructuredPowerPointLoader(file_path)
+            # Use python-pptx for better PPTX handling
+            prs = Presentation(file_path)
+            text = []
+            for slide in prs.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, "text"):
+                        text.append(shape.text)
+            if not text:
+                # Fallback to UnstructuredPowerPointLoader if no text found
+                loader = UnstructuredPowerPointLoader(file_path)
+                return loader.load()
+            return [Document(page_content="\n\n".join(text), metadata={"source": file_path})]
         elif file_ext in ['.xlsx', '.xls']:
             loader = UnstructuredExcelLoader(file_path)
         else:
@@ -156,4 +180,4 @@ def extract_text_from_pdf(file_content: bytes) -> str:
     text = ""
     for page in pdf_reader.pages:
         text += page.extract_text() + "\n"
-    return text
+    return text 

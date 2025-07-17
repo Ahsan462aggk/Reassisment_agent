@@ -22,3 +22,4 @@ app.include_router(slides_router.router)
 @app.get("/")
 def read_root():
     return {"message": " Teacher Dasboard API is running"}
+ 
