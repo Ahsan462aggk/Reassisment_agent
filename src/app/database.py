@@ -98,7 +98,7 @@ def get_pinecone_index():
                 logger.warning(f"Could not verify index dimension: {str(e)}")
                 logger.warning("Will attempt to create a new index")
                 
-        else:
+        else:   
             # Create a new index with the correct dimension
             logger.info(f"Creating new Pinecone index: {index_name} with dimension {EMBEDDING_DIMENSION}")
             try:
