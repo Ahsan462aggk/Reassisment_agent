@@ -1,7 +1,0 @@
-fastapi==0.115.12
-uvicorn==0.24.0
-python-dotenv==1.0.0
-python-magic==0.4.27
-langchain-google-genai==1.0.10
-langchain-core==0.1.12
-langchain-community==0.0.20
