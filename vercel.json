@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "buildCommand": "poetry install ",
+    "buildCommand": "pip install -r requirements.txt",
     "builds": [
       {
         "src": "src/app/main.py",
